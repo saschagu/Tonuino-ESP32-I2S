@@ -65,6 +65,8 @@ const uint8_t serialDebug = LOGLEVEL_DEBUG;          // Current loglevel for ser
 uint8_t buttonDebounceInterval = 50;                // Interval in ms to software-debounce buttons
 uint16_t intervalToLongPress = 700;                 // Interval in ms to distinguish between short and long press of previous/next-button
 
+const uint8_t VOLUME_INCREMENT = 1;
+
 // RFID
 #define RFID_SCAN_INTERVAL 300                      // Interval-time in ms (how often is RFID read?)
 

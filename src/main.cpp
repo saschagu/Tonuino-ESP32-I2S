@@ -742,12 +742,12 @@ void doButtonActions(void) {
                     switch (i)      // Long-press-actions
                     {
                     case 0:
-                        trackControlToQueueSender(LASTTRACK);
+                        trackControlToQueueSender(NEXTTRACK);
                         buttons[i].isPressed = false;
                         break;
 
                     case 1:
-                        trackControlToQueueSender(FIRSTTRACK);
+                        trackControlToQueueSender(PREVIOUSTRACK);
                         buttons[i].isPressed = false;
                         break;
 
@@ -764,12 +764,12 @@ void doButtonActions(void) {
                     switch (i)      // Short-press-actions
                     {
                     case 0:
-                        trackControlToQueueSender(NEXTTRACK);
+                        volumeToQueueSender(currentVolume + VOLUME_INCREMENT);
                         buttons[i].isPressed = false;
                         break;
 
                     case 1:
-                        trackControlToQueueSender(PREVIOUSTRACK);
+                        volumeToQueueSender(currentVolume - VOLUME_INCREMENT);
                         buttons[i].isPressed = false;
                         break;
 
@@ -2453,6 +2453,7 @@ void volumeToQueueSender(const int32_t _newVolume) {
     } else {
         _volume = _newVolume;
     }
+    currentVolume = _volume;
     xQueueSend(volumeQueue, &_volume, 0);
 }
 
