@@ -16,6 +16,7 @@
 #include <ESP32Encoder.h>
 #include "Arduino.h"
 #include <WiFi.h>
+#include <Update.h>
 #ifdef MDNS_ENABLE
     #include <ESPmDNS.h>
 #endif
@@ -4143,6 +4144,68 @@ void printWakeUpReason() {
     }
 #endif
 
+
+void performUpdate(Stream &updateSource, size_t updateSize) {
+   if (Update.begin(updateSize)) {
+      size_t written = Update.writeStream(updateSource);
+      if (written == updateSize) {
+         Serial.println("Written : " + String(written) + " successfully");
+      }
+      else {
+         Serial.println("Written only : " + String(written) + "/" + String(updateSize) + ". Retry?");
+      }
+      if (Update.end()) {
+         Serial.println("OTA done!");
+         if (Update.isFinished()) {
+            Serial.println("Update successfully completed. Rebooting.");
+         }
+         else {
+            Serial.println("Update not finished? Something went wrong!");
+         }
+      }
+      else {
+         Serial.println("Error Occurred. Error #: " + String(Update.getError()));
+      }
+
+   }
+   else
+   {
+      Serial.println("Not enough space to begin OTA");
+   }
+}
+
+// check given FS for valid update.bin and perform update if available
+void updateFromFS(fs::FS &fs) {
+   File updateBin = fs.open("/update.bin");
+   if (updateBin) {
+      if(updateBin.isDirectory()){
+         Serial.println("Error, update.bin is not a file");
+         updateBin.close();
+         return;
+      }
+
+      size_t updateSize = updateBin.size();
+
+      if (updateSize > 0) {
+         Serial.println("Try to start update");
+         performUpdate(updateBin, updateSize);
+      }
+      else {
+         Serial.println("Error, file is empty");
+      }
+
+      updateBin.close();
+
+      // whe finished remove the binary from sd card to indicate end of the process
+      fs.remove("/update.bin");
+   }
+   else {
+      Serial.println("Could not load update.bin from sd root");
+   }
+}
+
+
+
 void setup() {
     Serial.begin(115200);
     esp_sleep_enable_ext0_wakeup((gpio_num_t) DREHENCODER_BUTTON, 0);
@@ -4302,6 +4365,11 @@ void setup() {
     } else {
         Serial.println(F("UNKNOWN"));
     }
+
+    // for update from SD card see example at:
+    // https://github.com/espressif/arduino-esp32/blob/master/libraries/Update/examples/SD_Update/SD_Update.ino
+    Serial.println("looking for update.bin");
+    updateFromFS(SD);
 
     #ifdef HEADPHONE_ADJUST_ENABLE
         pinMode(HP_DETECT, INPUT);
