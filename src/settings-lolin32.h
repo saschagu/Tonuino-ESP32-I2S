@@ -24,11 +24,11 @@
     //  MISO    2
 #else
     // uSD-card-reader (via SPI)
-    #define SPISD_CS                    15          // GPIO for chip select (SD)
+    #define SPISD_CS                    17          // GPIO for chip select (SD)
     #ifndef SINGLE_SPI_ENABLE
-        #define SPISD_MOSI              13          // GPIO for master out slave in (SD) => not necessary for single-SPI
-        #define SPISD_MISO              16          // GPIO for master in slave ou (SD) => not necessary for single-SPI
-        #define SPISD_SCK               14          // GPIO for clock-signal (SD) => not necessary for single-SPI
+        #define SPISD_MOSI              22          // GPIO for master out slave in (SD) => not necessary for single-SPI
+        #define SPISD_MISO              33          // GPIO for master in slave ou (SD) => not necessary for single-SPI
+        #define SPISD_SCK               32          // GPIO for clock-signal (SD) => not necessary for single-SPI
     #endif
 #endif
 
@@ -53,18 +53,18 @@
 // Rotary encoder
 #define DREHENCODER_CLK                 34          // If you want to reverse encoder's direction, just switch GPIOs of CLK with DT (in software or hardware)
 #define DREHENCODER_DT                  35          // Info: Lolin D32 / Lolin D32 pro 35 are using 35 for battery-voltage-monitoring!
-#define DREHENCODER_BUTTON              32          // Button is used to switch Tonuino on and off
+#define DREHENCODER_BUTTON              2          // Button is used to switch Tonuino on and off
 
 // Control-buttons
 #define PAUSEPLAY_BUTTON                5           // GPIO to detect pause/play
 #define NEXT_BUTTON                     4           // GPIO to detect next
-#define PREVIOUS_BUTTON                 2           // GPIO to detect previous (Important: as of 19.11.2020 changed from 33 to 2; make sure to change in SD-MMC-mode)
+#define PREVIOUS_BUTTON                 0           // GPIO to detect previous (Important: as of 19.11.2020 changed from 33 to 2; make sure to change in SD-MMC-mode)
 
 // (optional) Power-control
-#define POWER                           17          // GPIO used to drive transistor-circuit, that switches off peripheral devices while ESP32-deepsleep
+#define POWER                           2          // GPIO used to drive transistor-circuit, that switches off peripheral devices while ESP32-deepsleep
 
 // (optional) Neopixel
-#define LED_PIN                         12          // GPIO for Neopixel-signaling
+#define LED_PIN                         22          // GPIO for Neopixel-signaling
 
 // (optinal) Headphone-detection
 #ifdef HEADPHONE_ADJUST_ENABLE

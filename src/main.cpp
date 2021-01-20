@@ -4234,7 +4234,7 @@ void setup() {
             pinMode(SPISD_CS, OUTPUT);
             digitalWrite(SPISD_CS, HIGH);
             spiSD.begin(SPISD_SCK, SPISD_MISO, SPISD_MOSI, SPISD_CS);
-            spiSD.setFrequency(1000000);
+            spiSD.setFrequency(16000000);
             while (!SD.begin(SPISD_CS, spiSD)) {
         #endif
     #else
