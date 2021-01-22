@@ -59,20 +59,20 @@
 
 #if (LANGUAGE == 1)
     #include "logmessages.h"
-    #include "HTMLmanagement.h"
-    #include "HTMLaccesspoint.h"
+    #define MANAGEMENT_HTML_PATH    "/management.html"
+    #define ACCESSPOINT_HTML_PATH   "/accesspoint.html"
 #endif
 #if (LANGUAGE == 2)
     #include "logmessages_EN.h"
-    #include "HTMLmanagement_EN.h"
-    #include "HTMLaccesspoint_EN.h"
+    #define MANAGEMENT_HTML_PATH    "/management_EN.html"
+    #define ACCESSPOINT_HTML_PATH   "/accesspoint_EN.html"
 #endif
 
 #include <AsyncTCP.h>
 #include <ESPAsyncWebServer.h>
 #include <ArduinoJson.h>
 #include <nvsDump.h>
-
+#include <SPIFFS.h>
 #include "freertos/ringbuf.h"
 
 
@@ -3125,7 +3125,11 @@ void accessPointStart(const char *SSID, IPAddress ip, IPAddress netmask) {
     loggerNl(logBuf, LOGLEVEL_NOTICE);
 
     wServer.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
-            request->send_P(200, "text/html", accesspoint_HTML);
+            if (SPIFFS.exists(ACCESSPOINT_HTML_PATH)) {
+                request->send(SPIFFS, ACCESSPOINT_HTML_PATH, "text/html");
+            } else {
+                request->send(200, "text/plain", HTML_NOT_FOUND_ERROR);
+            }
         });
 
     wServer.on("/init", HTTP_POST, [] (AsyncWebServerRequest *request) {
@@ -3137,7 +3141,12 @@ void accessPointStart(const char *SSID, IPAddress ip, IPAddress netmask) {
             prefsSettings.putString("Password", request->getParam("pwd", true)->value());
             prefsSettings.putString("Hostname", request->getParam("hostname", true)->value());
         }
-        request->send_P(200, "text/html", accesspoint_HTML);
+        if (SPIFFS.exists(ACCESSPOINT_HTML_PATH)) {
+            request->send(SPIFFS, ACCESSPOINT_HTML_PATH, "text/html");
+        } else {
+            request->send(200, "text/plain", HTML_NOT_FOUND_ERROR);
+        }
+
     });
 
     wServer.on("/restart", HTTP_GET, [] (AsyncWebServerRequest *request) {
@@ -3654,7 +3663,11 @@ void webserverStart(void) {
 
     // Default
     wServer.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
-        request->send_P(200, "text/html", management_HTML, templateProcessor);
+        if (SPIFFS.exists(MANAGEMENT_HTML_PATH)) {
+            request->send(SPIFFS, MANAGEMENT_HTML_PATH, "text/html", false, templateProcessor);
+        } else {
+            request->send(200, "text/plain", HTML_NOT_FOUND_ERROR);
+        }
     });
 
     // NVS-backup-upload
@@ -4655,6 +4668,11 @@ void setup() {
         createFile(FSystem,DIRECTORY_INDEX_FILE,"[]");
         esp_deep_sleep_start();
     }
+
+    if (!SPIFFS.begin()) {
+        Serial.println("Error mounting SPIFFS, please upload filesystem!");
+    }
+
     bootComplete = true;
 
     snprintf(logBuf, serialLoglength, "%s: %u", (char *) FPSTR(freeHeapAfterSetup), ESP.getFreeHeap());
